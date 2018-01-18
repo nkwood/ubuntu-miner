@@ -1,28 +1,53 @@
 #!/bin/bash
-clear
-echo "This script configures a bare install of Ubuntu Server 16.04 to mine Zcash with Nvidia cards."
-sleep 2
-echo ""
-echo "It will install the following dependencies, Nvidia proprietary drivers, then configure X-server and restart."
-echo ""
-echo ""
-echo ""
-echo ""
-sleep 2
-echo ""
-echo "The script will automatically proceed in 5 seconds.  To abort, press <CTRL>-C."
-sleep 5
-echo "Testing for network connectivity."
-if ping -q -c 1 -W 1 google.com >/dev/null; then
-  echo "The network is up."
-else
-  echo "Please check your internet connection."
-  exit 1
-fi
 if [[ $EUID -ne 0 ]]; then
    echo "**This script must be run as root.**"
    exit 1
 fi
+echo "Testing for network connectivity..."
+echo ""
+sleep 5
+if ping -q -c 1 -W 1 google.com >/dev/null; then
+  echo "The network is up."
+  sleep 5
+else
+  echo "Please check your internet connection and restart the script."
+  exit 1
+fi
+clear
+echo "This script configures a bare install of Ubuntu Server 16.04 to mine Zcash with Nvidia cards using nvidia-docker2."
+echo ""
+echo ""
+
+echo ""
+echo "It will install the following dependencies:"
+echo "     xserver-xorg (no-recommends flag)"
+echo "     lightdm (no-recommends flag)"
+echo "     build-essential"
+echo "     gcc"
+echo "     make"
+echo "     dkms"
+echo "     libgtk-3-dev"
+echo "     xdm"
+echo "     xorg-dev"
+echo "     nvidia-387 (proprietary drivers)"
+echo "     nvidia-cuda-toolkit"
+sleep 10
+echo ""
+echo "After installation, nouveau will be blacklisted, and the system will restart."
+sleep 10
+echo ""
+echo "After restart, docker and nvidia-docker2 will be installed."
+echo ""
+echo "A dummy X server will start (required by nvidia-settings overclocking utility),"
+echo "which may result in a blank screen even if not connected to an Nvidia card."
+echo ""
+echo "Installing and configuring SSH access is highly recommended."
+echo ""
+sleep 10
+echo "The script will automatically proceed in 5 seconds.  To abort, press <CTRL>-C."
+sleep 5
+clear
+
 
 echo "******"
 echo "Installing dependencies, this will take a while..."
@@ -32,20 +57,14 @@ apt install -y --no-install-recommends xserver-xorg lightdm
 apt install -y build-essential gcc make dkms libgtk-3-dev xdm xorg-dev
 sleep 4
 echo "******"
-echo "Downloading Nvidia driver, version 384"
-echo "******"
-sleep 2
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/384.111/NVIDIA-Linux-x86_64-384.111.run
-sleep 4
-echo "******"
-echo "Download complete, purging existing Nvidia drivers and installing downloaded driver"
+echo "Adding graphics driver repository and installing nvidia-387 and nvidia-cuda-toolkit."
 echo "******"
 sleep 2
 apt purge -y nvidia-*
-chmod +x NVIDIA-Linux-x86_64-384.111.run
-./NVIDIA-Linux-x86_64-384.111.run
-rm NVIDIA-Linux-x86_64-384.111.run
-sleep 4
+add-apt-repository ppa:graphics-drivers
+apt update
+apt install -y nvidia-387 nvidia-cuda-toolkit
+sleep 10
 echo "******"
 echo "Nvidia driver installed"
 echo "Blacklisting nouveau"
