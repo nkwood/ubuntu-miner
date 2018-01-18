@@ -17,9 +17,8 @@ clear
 echo "This script configures a bare install of Ubuntu Server 16.04 to mine Zcash with Nvidia cards using nvidia-docker2."
 echo ""
 echo ""
-
-echo ""
-echo "It will install the following dependencies:"
+sleep 10
+echo "It will install the following packages:"
 echo "     xserver-xorg (no-recommends flag)"
 echo "     lightdm (no-recommends flag)"
 echo "     build-essential"
@@ -31,34 +30,37 @@ echo "     xdm"
 echo "     xorg-dev"
 echo "     nvidia-387 (proprietary drivers)"
 echo "     nvidia-cuda-toolkit"
+echo "     docker-ce"
+echo "     nvidia-docker2"
 sleep 10
 echo ""
-echo "After installation, nouveau will be blacklisted, and the system will restart."
+echo "Nouveau will be blacklisted, and the system will restart."
 sleep 10
-echo ""
-echo "After restart, docker and nvidia-docker2 will be installed."
 echo ""
 echo "A dummy X server will start (required by nvidia-settings overclocking utility),"
-echo "which may result in a blank screen even if not connected to an Nvidia card."
+echo "which may result in a blank screen from any local console, regardless of connection."
 echo ""
 echo "Installing and configuring SSH access is highly recommended."
 echo ""
 sleep 10
-echo "The script will automatically proceed in 5 seconds.  To abort, press <CTRL>-C."
-sleep 5
+echo "The script will automatically proceed in 10 seconds.  To abort, press <CTRL>-C."
+sleep 10
 clear
 
 
 echo "******"
-echo "Installing dependencies, this will take a while..."
+echo "Installing packages, this will take a while..."
 echo "******"
 sleep 5
+apt update
 apt install -y --no-install-recommends xserver-xorg lightdm
 apt install -y build-essential gcc make dkms libgtk-3-dev xdm xorg-dev
 sleep 4
+echo ""
 echo "******"
 echo "Adding graphics driver repository and installing nvidia-387 and nvidia-cuda-toolkit."
 echo "******"
+echo ""
 sleep 2
 apt purge -y nvidia-*
 add-apt-repository ppa:graphics-drivers
@@ -97,8 +99,41 @@ nvidia-xconfig -a --allow-empty-initial-configuration --cool-bits=28 --use-displ
 
 sed -i '/Driver/a Option "Interactive" "False"' /etc/X11/xorg.conf
 sleep 2
+echo ""
 echo "******"
+echo "Installing docker and nvidia-docker."
 echo "******"
+echo ""
+sleep 2
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+curl -sL  https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+curl -sL https://nvidia.github.io/nvidia-docker/ubuntu16.04/amd64/nvidia-docker.list | \
+ tee /etc/apt/sources.list.d/nvidia-docker.list
+ apt update
+ apt install -y docker-ce
+ apt install -y nvidia-docker2
+ pkill -SIGHUP dockerd
+sleep 4
+echo "******"
+echo "Docker and nvidia-docker2 installed."
+echo "******"
+sleep 2
+echo ""
+echo "******"
+echo "Configuring X server to start automatically every boot."
+echo ""
+echo "SSH access is highly preferred, but if you need to kill the X session, press"
+echo "<CTRL>-<ALT>-<F1> to access the local console.  Note that the nvidia-settings"
+echo "overclock utility will not work without an active X session."
+echo "******"
+
+#do magic
+
+
+
+
+sleep 10
 echo "Install complete, restarting in 10 seconds."
 echo "Please run 'install-2.sh' once logged in again."
 echo "******"
