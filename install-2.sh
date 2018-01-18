@@ -1,14 +1,17 @@
 #!/bin/bash
 clear
+echo ""
+echo "Continuing configuration of Nvidia-docker."
+echo "
 echo "This script continues immediately after restart initiated by install.sh."
-sleep 2
+sleep 5
 echo ""
 echo "It will test to ensure Nvidia is properly installed."
 echo ""
+echo "You should run this script "
 echo ""
 echo ""
-echo ""
-sleep 2
+sleep 5
 echo ""
 echo "The script will automatically proceed in 5 seconds.  To abort, press <CTRL>-C."
 sleep 5
@@ -23,10 +26,15 @@ if [[ $EUID -ne 0 ]]; then
    echo "**This script must be run as root.**"
    exit 1
 fi
-
+sleep 2
+clear
+echo ""
+echo ""
 echo "******"
-echo "Installing docker and nvidia-docker."
+echo "Installing docker-ce and nvidia-docker2."
 echo "******"
+echo ""
+echo ""
 sleep 5
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 curl -sL  https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
@@ -46,12 +54,16 @@ sleep 2
 
 echo "******"
 echo "Starting X server to enble overclocking and manual fan control."
-sleep 1
+echo "******"
 echo ""
-echo "The local display will go dark.  Please ensure you have working SSH access."
-sleep 1
+sleep 2
+echo ""
+echo ""
+sleep 2
 echo ""
 echo "To exit back to the local terminal, press <CTRL> <ALT> <F1>."
 sleep 10
 
 X :1 & export DISPLAY=1
+
+
